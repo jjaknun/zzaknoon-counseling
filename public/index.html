@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>짝눈의 고민상담소 🐤 세상 모든 고민과 사연 접수처</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png">
+  
+  <!-- Tailwind CSS CDN for utility classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            retroOrange: '#FF6B35',
+            retroOrangeDark: '#E85D04',
+            retroYellow: '#FFD166',
+            retroYellowLight: '#FFF8D6',
+            retroCream: '#FFFDF5',
+            retroCreamCard: '#FFF9E6',
+            retroDark: '#2B2523'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="selection:bg-retroOrange selection:text-white">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo" onclick="retroSound.playClick()">
+        <img src="assets/images/favicon.png" alt="짝눈이 로고" class="shadow-sm">
+        <div>
+          <span class="nav-logo-title block leading-none">짝눈의 고민상담소</span>
+          <span class="text-xs text-gray-500 font-sans hidden sm:block">무엇이든 털어놓는 비밀 안식처</span>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-2 sm:gap-4">
+        <ul class="nav-links">
+          <li><a href="#hero" class="nav-link" onclick="retroSound.playClick()">🏠 홈</a></li>
+          <li><a href="#submit-section" class="nav-link" onclick="retroSound.playClick()">✍️ 사연 보내기</a></li>
+          <li><button type="button" class="nav-link cursor-pointer" onclick="openGuideModal(); retroSound.playClick()">📖 이용 안내</button></li>
+          <li><button type="button" class="nav-link cursor-pointer" onclick="openViewerModal(); retroSound.playClick()">👀 짝눈이 도감</button></li>
+        </ul>
+
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" class="pixel-btn pixel-btn-cream px-2 py-1 text-sm rounded-lg" title="소리 켜기/끄기" onclick="toggleSound()">
+          <span id="soundIcon">🔊</span>
+        </button>
+
+        <!-- Admin Entrance -->
+        <button onclick="checkOrOpenAdminModal()" class="pixel-btn pixel-btn-yellow text-xs sm:text-sm py-1.5 px-3">
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">소장실</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <main class="flex-grow">
+    <section id="hero" class="max-w-5xl mx-auto px-4 pt-8 pb-12 text-center">
+      
+      <!-- Live Ticker Bar -->
+      <div class="pixel-box-sm inline-flex items-center gap-3 px-4 py-2 mb-8 bg-white max-w-xl mx-auto">
+        <span class="pixel-badge bg-retroOrange text-white text-xs">LIVE</span>
+        <div class="text-xs sm:text-sm truncate text-left text-gray-700" id="tickerText">
+          🐤 짝눈이가 상담소 문을 열고 새로운 사연을 기다리고 있어요!
+        </div>
+      </div>
+
+      <!-- Hero Character & Speech Bubble Interaction -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-10">
+        
+        <!-- Interactive Mascot -->
+        <div class="relative group cursor-pointer" onclick="interactMascot()">
+          <div class="w-48 h-48 sm:w-60 sm:h-60 rounded-3xl overflow-hidden border-4 border-retroDark shadow-pixel-lg bg-gradient-to-b from-[#bce0fd] to-[#d8eeff] flex items-center justify-center relative character-floating">
+            <img src="assets/images/mascot_main.jpg" alt="짝눈이 소장님" class="w-full h-full object-cover">
+            <div class="absolute bottom-2 right-2 bg-retroDark text-white text-[11px] font-retro px-2 py-0.5 rounded-md opacity-80 group-hover:opacity-100">
+              클릭해봐! 👆
+            </div>
+          </div>
+          <div class="text-xs font-retro text-gray-500 mt-2">
+            상담소 주인장: <strong class="text-retroOrange">짝눈이</strong> (3세 / 경청 마스터)
+          </div>
+        </div>
+
+        <!-- Hero Speech & Catchphrases -->
+        <div class="max-w-lg text-left">
+          <div class="speech-bubble speech-bubble-left mb-6 bg-white" id="mascotBubble">
+            "어서 오세요! 짝눈의 고민상담소입니다! <br>
+            <span class="text-retroOrange">세상 모든 사연과 고민</span>을 편하게 털어놓으세요!"
+          </div>
+
+          <div class="space-y-2 mb-6">
+            <h1 class="font-retro text-2xl sm:text-3xl text-retroDark leading-tight">
+              진지한 고민도, <br class="sm:hidden">
+              <span class="text-retroOrange underline decoration-retroYellow decoration-4">정말 쓸데없는 고민도</span> 환영!
+            </h1>
+            <p class="text-sm sm:text-base text-gray-600">
+              익명성 100% 보장! 시청자 여러분의 일상 이야기, 황당 썰, 연애 고민까지 스트리머와 함께 방송에서 나누어봐요.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="#submit-section" class="pixel-btn pixel-btn-orange text-base sm:text-lg py-3 px-6" onclick="retroSound.playClick()">
+              <i data-lucide="send" class="w-5 h-5"></i>
+              고민 및 사연 보내기
+            </a>
+            <button onclick="openGuideModal(); retroSound.playClick()" class="pixel-btn pixel-btn-cream text-sm py-3 px-4">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+              이용 가이드
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Counters -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+        <div class="pixel-box p-4 bg-white">
+          <div class="text-xs font-retro text-gray-500 mb-1">누적 접수된 사연</div>
+          <div class="font-retro text-2xl sm:text-3xl text-retroOrange" id="statTotalCount">- 건</div>
+        </div>
+        <div class="pixel-box p-4 bg-white">
+          <div class="text-xs font-retro text-gray-500 mb-1">오늘 도착한 고민</div>
+          <div class="font-retro text-2xl sm:text-3xl text-retroDark" id="statTodayCount">- 건</div>
+        </div>
+        <div class="pixel-box p-4 bg-white col-span-2 sm:col-span-1">
+          <div class="text-xs font-retro text-gray-500 mb-1">방송 소개율</div>
+          <div class="font-retro text-2xl sm:text-3xl text-emerald-600">HOT 🔥</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CATEGORIES SECTION ==================== -->
+    <section class="max-w-5xl mx-auto px-4 py-8">
+      <div class="text-center mb-8">
+        <span class="pixel-badge bg-retroYellow text-retroDark mb-2">ANY STORIES WELCOME</span>
+        <h2 class="font-retro text-2xl sm:text-3xl text-retroDark">어떤 사연이든 환영해요!</h2>
+        <p class="text-sm text-gray-600 mt-1">카테고리를 클릭하면 해당 주제로 즉시 사연을 작성할 수 있어요.</p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4" id="categoryCardsGrid">
+        
+        <!-- Category Card 1 -->
+        <div class="category-card" onclick="selectCategoryQuick('연애')">
+          <div class="cat-icon">❤️</div>
+          <div class="cat-title">연애 고민</div>
+          <div class="cat-desc">짝사랑, 썸, 이별, 연애의 모든 것</div>
+        </div>
+
+        <!-- Category Card 2 -->
+        <div class="category-card" onclick="selectCategoryQuick('학업')">
+          <div class="cat-icon">📚</div>
+          <div class="cat-title">학업 고민</div>
+          <div class="cat-desc">시험, 성적, 공부 슬럼프, 과제</div>
+        </div>
+
+        <!-- Category Card 3 -->
+        <div class="category-card" onclick="selectCategoryQuick('진로')">
+          <div class="cat-icon">🧭</div>
+          <div class="cat-title">진로 고민</div>
+          <div class="cat-desc">취업, 이직, 꿈, 미래에 대한 불안</div>
+        </div>
+
+        <!-- Category Card 4 -->
+        <div class="category-card" onclick="selectCategoryQuick('인간관계')">
+          <div class="cat-icon">👥</div>
+          <div class="cat-title">인간관계</div>
+          <div class="cat-desc">친구, 동기, 손절각, 어색한 사이</div>
+        </div>
+
+        <!-- Category Card 5 -->
+        <div class="category-card" onclick="selectCategoryQuick('가족')">
+          <div class="cat-icon">🏠</div>
+          <div class="cat-title">가족 고민</div>
+          <div class="cat-desc">부모님, 형제자매, 명절 잔소리</div>
+        </div>
+
+        <!-- Category Card 6 -->
+        <div class="category-card" onclick="selectCategoryQuick('직장')">
+          <div class="cat-icon">💼</div>
+          <div class="cat-title">직장 생활</div>
+          <div class="cat-desc">상사 스트레스, 야근, 회식 빌런</div>
+        </div>
+
+        <!-- Category Card 7 -->
+        <div class="category-card" onclick="selectCategoryQuick('일상')">
+          <div class="cat-icon">☕</div>
+          <div class="cat-title">일상 이야기</div>
+          <div class="cat-desc">소소한 하루 일기, 나누고 싶은 감정</div>
+        </div>
+
+        <!-- Category Card 8 -->
+        <div class="category-card" onclick="selectCategoryQuick('웃긴 사연')">
+          <div class="cat-icon">🤣</div>
+          <div class="cat-title">웃긴 사연</div>
+          <div class="cat-desc">이불킥 썰, 흑역사, 황당한 사건</div>
+        </div>
+
+        <!-- Category Card 9 -->
+        <div class="category-card" onclick="selectCategoryQuick('하찮은 고민')">
+          <div class="cat-icon">🥔</div>
+          <div class="cat-title">하찮은 고민</div>
+          <div class="cat-desc">오늘 점심 뭐 먹지? 사소한 딜레마</div>
+        </div>
+
+        <!-- Category Card 10 -->
+        <div class="category-card" onclick="selectCategoryQuick('기타')">
+          <div class="cat-icon">❓</div>
+          <div class="cat-title">기타 사연</div>
+          <div class="cat-desc">틀에 얽매이지 않는 자유로운 이야기</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SUBMISSION SECTION ==================== -->
+    <section id="submit-section" class="max-w-3xl mx-auto px-4 py-12">
+      
+      <!-- Submission Container -->
+      <div class="pixel-box p-6 sm:p-10 bg-retroCreamCard" id="formContainer">
+        
+        <!-- Header in Form -->
+        <div class="flex items-center justify-between border-b-2 border-retroDark pb-4 mb-6">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">📝</span>
+            <div>
+              <h2 class="font-retro text-2xl text-retroDark leading-tight">짝눈에게 고민 보내기</h2>
+              <p class="text-xs text-gray-600">회원가입 없이 100% 익명으로 바로 접수됩니다.</p>
+            </div>
+          </div>
+          <div class="hidden sm:block text-right">
+            <span class="pixel-badge bg-white text-xs">안심 접수 중 🔒</span>
+          </div>
+        </div>
+
+        <!-- Story Form -->
+        <form id="storyForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+          
+          <!-- 1. Category Selection -->
+          <div>
+            <label class="block font-retro text-base text-retroDark mb-2 flex items-center justify-between">
+              <span>1. 사연 카테고리 <span class="text-retroOrange">*</span></span>
+              <span class="text-xs font-sans text-gray-500">주제에 맞는 버튼을 눌러주세요</span>
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="categoryChips">
+              <!-- Dynamically populated or static chips -->
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="연애" onclick="setFormCategory('연애')">❤️ 연애</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="학업" onclick="setFormCategory('학업')">📚 학업</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="진로" onclick="setFormCategory('진로')">🧭 진로</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="인간관계" onclick="setFormCategory('인간관계')">👥 인간관계</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="가족" onclick="setFormCategory('가족')">🏠 가족</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="직장" onclick="setFormCategory('직장')">💼 직장</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="일상" onclick="setFormCategory('일상')">☕ 일상</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="웃긴 사연" onclick="setFormCategory('웃긴 사연')">🤣 웃긴 사연</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="하찮은 고민" onclick="setFormCategory('하찮은 고민')">🥔 하찮은 고민</button>
+              <button type="button" class="pixel-btn pixel-btn-cream text-xs py-2 px-2 category-chip" data-category="기타" onclick="setFormCategory('기타')">❓ 기타</button>
+            </div>
+            <input type="hidden" id="categoryInput" name="category" required value="하찮은 고민">
+          </div>
+
+          <!-- 2. Story Title -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="titleInput" class="font-retro text-base text-retroDark">
+                2. 사연 제목 <span class="text-retroOrange">*</span>
+              </label>
+              <span class="text-xs text-gray-500"><span id="titleCount">0</span>/60자</span>
+            </div>
+            <input type="text" id="titleInput" name="title" maxlength="60" required
+              placeholder="예: 짝사랑하는 동기에게 고백해도 될까요? / 비둘기랑 눈싸움하다 버스 놓침"
+              class="form-input" oninput="updateTitleCount()">
+          </div>
+
+          <!-- 3. Story Content -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="contentInput" class="font-retro text-base text-retroDark">
+                3. 사연 내용 <span class="text-retroOrange">*</span>
+              </label>
+              <span class="text-xs text-gray-500"><span id="contentCount">0</span>/3,000자 (최소 10자)</span>
+            </div>
+            <textarea id="contentInput" name="content" maxlength="3000" minlength="10" required
+              placeholder="당신의 솔직한 이야기를 편안하게 들려주세요. 진지한 상담부터 사소한 넋두리, 혼자만 알기 아까운 썰까지 무엇이든 좋습니다! (여러 줄 작성 가능)"
+              class="form-textarea" oninput="updateContentCount()"></textarea>
+            <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-1">
+              <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              줄바꿈(엔터)이 그대로 유지되어 방송 시 스트리머가 편하게 읽을 수 있어요.
+            </div>
+          </div>
+
+          <!-- 4. Nickname -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="nicknameInput" class="font-retro text-base text-retroDark">
+                4. 익명 닉네임 <span class="text-xs font-sans text-gray-500">(선택 사항)</span>
+              </label>
+              <span class="text-xs text-gray-500">최대 20자</span>
+            </div>
+            <input type="text" id="nicknameInput" name="nickname" maxlength="20"
+              placeholder="미입력 시 '익명의 짝눈친구 #랜덤번호'로 자동 부여됩니다"
+              class="form-input">
+          </div>
+
+          <!-- 5. Agreements -->
+          <div class="bg-white p-4 rounded-xl border-2 border-retroDark space-y-3">
+            <!-- Broadcast Agree Checkbox -->
+            <label class="custom-checkbox">
+              <input type="checkbox" id="broadcastAgree" name="broadcast_agree" checked>
+              <div class="text-xs sm:text-sm">
+                <strong class="text-retroOrange">[선택] 스트리머 방송 소개 활용에 동의합니다.</strong>
+                <p class="text-gray-500 text-xs mt-0.5">
+                  동의하지 않아도 사연은 안전하게 접수되며, 체크 해제 시 방송에서는 절대 소개되지 않고 상담소 보관함에만 저장됩니다.
+                </p>
+              </div>
+            </label>
+
+            <div class="border-t border-gray-200 pt-2"></div>
+
+            <!-- Privacy Warning Checkbox -->
+            <label class="custom-checkbox">
+              <input type="checkbox" id="privacyAgree" required>
+              <div class="text-xs sm:text-sm">
+                <strong class="text-retroDark">[필수] 개인정보 보호 및 작성 유의사항에 동의합니다.</strong>
+                <p class="text-gray-500 text-xs mt-0.5">
+                  본인 및 타인의 실명, 전화번호, 주소, 직장명 등 민감한 개인정보나 명예훼손성 내용은 작성을 금지합니다.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="text-center pt-2">
+            <button type="submit" id="submitBtn" class="pixel-btn pixel-btn-orange w-full sm:w-auto text-lg py-4 px-10 shadow-pixel-lg">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              짝눈에게 고민 보내기!
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- ==================== SUCCESS RECEIPT (Hidden Initially) ==================== -->
+      <div id="successContainer" class="hidden text-center py-6 animate-fade-in">
+        
+        <!-- Animated Mascot Celebrating -->
+        <div class="relative w-40 h-40 mx-auto mb-6">
+          <div class="w-full h-full rounded-full border-4 border-retroDark overflow-hidden shadow-pixel-lg bg-yellow-100 flex items-center justify-center">
+            <img src="assets/images/mascot_main.jpg" alt="기뻐하는 짝눈이" class="w-full h-full object-cover">
+          </div>
+          <div class="absolute -top-3 -right-3 text-3xl animate-bounce">🎉</div>
+          <div class="absolute -bottom-2 -left-2 text-2xl">✨</div>
+        </div>
+
+        <div class="speech-bubble speech-bubble-bottom inline-block max-w-md mx-auto mb-6 text-center">
+          <span class="text-retroOrange font-bold text-xl block mb-1">"사연 접수 완료!!"</span>
+          소중한 사연을 보내줘서 고마워요!<br>
+          짝눈이가 꼼꼼하게 읽어볼게요!
+        </div>
+
+        <!-- Receipt Ticket -->
+        <div class="retro-receipt text-left my-8">
+          <div class="text-center border-b-2 border-dashed border-gray-400 pb-3 mb-4">
+            <h3 class="font-retro text-lg text-retroDark">🐤 짝눈의 고민상담소 접수증</h3>
+            <p class="text-[11px] text-gray-500 font-mono" id="receiptTime">2026-11-20 16:50:00</p>
+          </div>
+
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500 font-retro">접수 번호</span>
+              <span class="font-mono font-bold text-retroOrange" id="receiptTicketCode">ZZAK-0000</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500 font-retro">카테고리</span>
+              <span class="font-bold" id="receiptCategory">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500 font-retro">닉네임</span>
+              <span class="font-bold text-gray-700" id="receiptNickname">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500 font-retro">사연 제목</span>
+              <span class="font-bold truncate max-w-[220px]" id="receiptTitle">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500 font-retro">방송 소개 여부</span>
+              <span class="pixel-badge text-[11px]" id="receiptBroadcastAgree">동의함</span>
+            </div>
+          </div>
+
+          <div class="border-t-2 border-dashed border-gray-400 pt-3 mt-4 text-center">
+            <p class="text-[11px] text-gray-500">
+              ※ 접수번호를 기억해 두시면 추후 방송 사연 선정 시 확인하기 편해요!
+            </p>
+          </div>
+        </div>
+
+        <!-- Return Actions -->
+        <div class="flex flex-wrap justify-center gap-4 mt-6">
+          <button onclick="resetToHome()" class="pixel-btn pixel-btn-cream py-3 px-6">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            메인으로 돌아가기
+          </button>
+          <button onclick="writeAnotherStory()" class="pixel-btn pixel-btn-yellow py-3 px-6">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            새 사연 작성하기
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== STREAMER INTRO & BROADCAST INFO ==================== -->
+    <section class="max-w-4xl mx-auto px-4 py-8">
+      <div class="pixel-box p-6 sm:p-8 bg-white flex flex-col md:flex-row items-center gap-6">
+        <div class="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0 rounded-2xl border-3 border-retroDark overflow-hidden bg-retroOrangeLight">
+          <img src="assets/images/mascot_front.jpg" alt="짝눈이 소장" class="w-full h-full object-cover">
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="pixel-badge bg-retroOrange text-white text-xs">LIVE BROADCAST</span>
+            <span class="font-retro text-lg text-retroDark">고민상담소 방송은 어떻게 진행되나요?</span>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            매주 정기 방송에서 스트리머가 시청자분들이 보내주신 고민을 실시간으로 읽고 솔직담백한 조언과 엉뚱한 해결책을 나눕니다!
+            채팅창 시청자들과 함께 투표도 하고 따뜻한 위로와 유쾌한 웃음을 선물해 드려요.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-retro text-gray-700 pt-1">
+            <span class="bg-yellow-100 px-2 py-1 rounded border border-retroDark">✔️ 익명 100% 보장</span>
+            <span class="bg-orange-100 px-2 py-1 rounded border border-retroDark">✔️ 부담 없는 가벼운 고민 환영</span>
+            <span class="bg-emerald-100 px-2 py-1 rounded border border-retroDark">✔️ 방송 동의 사연만 선정</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t-3 border-retroDark bg-retroCreamCard py-8 px-4 mt-12 text-center text-sm text-gray-600">
+    <div class="max-w-4xl mx-auto space-y-3">
+      <div class="flex items-center justify-center gap-2 font-retro text-lg text-retroDark">
+        <span>🐤 짝눈의 고민상담소</span>
+      </div>
+      <p class="text-xs text-gray-500">
+        본 사이트는 스트리머와 시청자의 즐거운 소통을 위해 제작된 참여형 사연 접수 플랫폼입니다.<br>
+        익명으로 제출된 사연 중 방송 활용에 동의한 사연에 한하여 콘텐츠에 활용됩니다.
+      </p>
+      <div class="pt-2 text-[11px] text-gray-400">
+        © 2024-2026 짝눈의 고민상담소. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL 1: 이용 안내 가이드 ==================== -->
+  <div id="guideModal" class="modal-overlay" onclick="if(event.target === this) closeGuideModal()">
+    <div class="modal-content p-6 sm:p-8">
+      <div class="flex items-center justify-between border-b-2 border-retroDark pb-3 mb-4">
+        <h3 class="font-retro text-xl text-retroDark flex items-center gap-2">
+          📖 짝눈의 고민상담소 이용 안내
+        </h3>
+        <button onclick="closeGuideModal()" class="text-gray-500 hover:text-black font-bold text-xl">&times;</button>
+      </div>
+
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
+        <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+          <strong class="font-retro text-retroDark block mb-1">1. 어떤 사연을 보낼 수 있나요?</strong>
+          연애, 학업, 진로, 가족, 직장, 대인관계는 물론이고, "오늘 무슨 라면 먹을까요?", "비둘기한테 째려봄 당함" 같은 아주 사소하고 하찮은 일상 고민, 배꼽 빠지는 황당 썰까지 무엇이든 자유롭게 보내실 수 있습니다.
+        </div>
+
+        <div class="p-3 bg-orange-50 rounded-lg border border-orange-200">
+          <strong class="font-retro text-retroDark block mb-1">2. 익명성은 어떻게 보장되나요?</strong>
+          회원가입이나 전화번호 인증 없이 완전히 익명으로 제출됩니다. 닉네임 입력칸을 비워두시면 귀여운 익명 별명이 자동으로 생성됩니다.
+        </div>
+
+        <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+          <strong class="font-retro text-retroDark block mb-1">3. 방송에 소개되고 싶지 않다면?</strong>
+          사연 작성 시 [방송 활용 동의] 체크박스를 해제하시면 됩니다! 방송에서는 절대 소개되지 않으며 오직 짝눈이 상담소에만 안전하게 보관됩니다.
+        </div>
+
+        <div class="p-3 bg-red-50 rounded-lg border border-red-200">
+          <strong class="font-retro text-retroDark block mb-1">4. 사연 작성 시 주의사항 (필독!)</strong>
+          특정인에 대한 비방, 명예훼손, 실명, 전화번호, 주소, 계좌번호 등 민감한 개인정보가 들어가지 않도록 각별히 유의해 주세요. 부적절한 사연은 관리자에 의해 즉시 삭제될 수 있습니다.
+        </div>
+      </div>
+
+      <div class="mt-6 text-center">
+        <button onclick="closeGuideModal()" class="pixel-btn pixel-btn-orange py-2 px-6">
+          이해했어요! 확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: 짝눈이 360° 도감 뷰어 ==================== -->
+  <div id="viewerModal" class="modal-overlay" onclick="if(event.target === this) closeViewerModal()">
+    <div class="modal-content p-6 text-center max-w-lg">
+      <div class="flex items-center justify-between border-b-2 border-retroDark pb-2 mb-4">
+        <h3 class="font-retro text-lg text-retroDark">🐤 짝눈이 6방향 도감 뷰어</h3>
+        <button onclick="closeViewerModal()" class="text-gray-500 hover:text-black font-bold text-xl">&times;</button>
+      </div>
+
+      <div class="w-48 h-48 mx-auto rounded-2xl border-3 border-retroDark overflow-hidden bg-sky-100 shadow-pixel mb-4 flex items-center justify-center">
+        <img id="viewerImage" src="assets/images/mascot_front.jpg" alt="짝눈이 앵글" class="w-full h-full object-cover">
+      </div>
+
+      <p class="font-retro text-base text-retroOrange mb-4" id="viewerLabel">정짝 (정면 짝눈이)</p>
+
+      <!-- 6-Angle Selector Buttons -->
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="changeViewerAngle('front', '정짝 (정면)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">정짝</button>
+        <button onclick="changeViewerAngle('back', '후짝 (뒷모습)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">후짝</button>
+        <button onclick="changeViewerAngle('left', '좌측짝 (옆태)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">좌측짝</button>
+        <button onclick="changeViewerAngle('right', '우측짝 (옆태)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">우측짝</button>
+        <button onclick="changeViewerAngle('top', '상짝 (위에서)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">상짝</button>
+        <button onclick="changeViewerAngle('bottom', '하짝 (발바닥)')" class="pixel-btn pixel-btn-cream text-xs py-1.5">하짝</button>
+      </div>
+
+      <p class="text-xs text-gray-500 mt-4">
+        스트리머 공식 마스코트 짝눈이의 다양한 앵글을 구경해 보세요!
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: 관리자(소장실) 로그인 ==================== -->
+  <div id="adminLoginModal" class="modal-overlay" onclick="if(event.target === this) closeAdminModal()">
+    <div class="modal-content p-6 max-w-sm">
+      <div class="flex items-center justify-between border-b-2 border-retroDark pb-2 mb-4">
+        <h3 class="font-retro text-lg text-retroDark flex items-center gap-2">
+          🔒 소장실 (관리자 로그인)
+        </h3>
+        <button onclick="closeAdminModal()" class="text-gray-500 hover:text-black font-bold text-xl">&times;</button>
+      </div>
+
+      <p class="text-xs text-gray-600 mb-4">
+        스트리머 전용 사연 관리 및 방송 대시보드 공간입니다.
+      </p>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-retro text-gray-700 mb-1">소장실 비밀번호</label>
+          <input type="password" id="adminPasswordInput" required placeholder="비밀번호 입력"
+            class="form-input text-sm">
+        </div>
+
+        <div id="adminLoginError" class="text-xs text-red-600 hidden font-bold"></div>
+
+        <button type="submit" id="adminLoginBtn" class="pixel-btn pixel-btn-yellow w-full text-sm py-2.5">
+          입장하기 🔑
+        </button>
+      </form>
+      <div class="mt-3 text-[11px] text-gray-400 text-center">
+        (초기 설정 비밀번호: <code class="bg-gray-100 px-1 py-0.5 rounded">zzaknoon1234</code>)
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/sound.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>

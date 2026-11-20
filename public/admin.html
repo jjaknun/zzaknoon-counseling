@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>소장실 대시보드 🐤 짝눈의 고민상담소 관리자</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            retroOrange: '#FF6B35',
+            retroOrangeDark: '#E85D04',
+            retroYellow: '#FFD166',
+            retroCream: '#FFFDF5',
+            retroCreamCard: '#FFF9E6',
+            retroDark: '#2B2523'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 text-retroDark min-h-screen flex flex-col">
+
+  <!-- ==================== ADMIN TOP NAVBAR ==================== -->
+  <header class="bg-white border-b-3 border-retroDark sticky top-0 z-40 px-4 py-3 shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group text-decoration-none">
+          <img src="assets/images/favicon.png" alt="짝눈이" class="w-9 h-9 rounded-full border-2 border-retroDark">
+          <div>
+            <span class="font-retro text-lg text-retroOrange block leading-none">짝눈 소장실</span>
+            <span class="text-[11px] text-gray-500 font-sans">스트리머 전용 사연 관리소</span>
+          </div>
+        </a>
+        <span class="pixel-badge bg-yellow-100 text-yellow-800 text-xs hidden sm:inline-flex">
+          LIVE DASHBOARD
+        </span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Live Connection Indicator -->
+        <div class="flex items-center gap-1.5 text-xs font-mono bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="hidden md:inline">실시간 수신 중</span>
+        </div>
+
+        <!-- Export CSV Button -->
+        <button onclick="exportCsv()" class="pixel-btn pixel-btn-cream text-xs py-1.5 px-3" title="엑셀 CSV 다운로드">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">CSV 백업</span>
+        </button>
+
+        <!-- Change Password Button -->
+        <button onclick="openChangePasswordModal()" class="pixel-btn pixel-btn-cream text-xs py-1.5 px-3">
+          <i data-lucide="key" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">비번 변경</span>
+        </button>
+
+        <!-- View Public Site -->
+        <a href="/" target="_blank" class="pixel-btn pixel-btn-yellow text-xs py-1.5 px-3" title="접수 사이트 새창 열기">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">상담소 홈</span>
+        </a>
+
+        <!-- Logout Button -->
+        <button onclick="handleLogout()" class="pixel-btn pixel-btn-dark text-xs py-1.5 px-3">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>로그아웃</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN ADMIN CONTENT ==================== -->
+  <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
+
+    <!-- Top Notice Banner for Streamer -->
+    <div class="pixel-box-sm bg-gradient-to-r from-orange-50 to-yellow-50 p-4 border-2 border-retroOrange flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🎙️</span>
+        <div>
+          <h2 class="font-retro text-base text-retroDark">스트리머 방송 가이드</h2>
+          <p class="text-xs text-gray-600">
+            사연 카드의 <strong class="text-retroOrange">[방송용 복사]</strong> 버튼을 누르면 제목, 닉네임, 본문이 메모장이나 OBS에 붙여넣기 좋게 정돈되어 클립보드에 복사됩니다!
+          </p>
+        </div>
+      </div>
+      <button onclick="loadAdminStats(); loadStories(); if(window.retroSound) window.retroSound.playClick();" class="pixel-btn pixel-btn-orange text-xs py-1 px-3 whitespace-nowrap self-end sm:self-auto">
+        <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> 새로고침
+      </button>
+    </div>
+
+    <!-- ==================== STATS OVERVIEW CARDS ==================== -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4" id="statsCardsContainer">
+      
+      <!-- Total -->
+      <div class="pixel-box p-3 bg-white text-center">
+        <div class="text-xs text-gray-500 font-retro mb-1">총 사연 수</div>
+        <div class="font-retro text-2xl text-retroDark" id="statTotal">-</div>
+      </div>
+
+      <!-- Unread (NEW) -->
+      <div class="pixel-box p-3 bg-red-50 text-center border-red-300">
+        <div class="text-xs text-red-600 font-retro mb-1 flex items-center justify-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          미확인 (NEW)
+        </div>
+        <div class="font-retro text-2xl text-red-600" id="statUnread">-</div>
+      </div>
+
+      <!-- Broadcast Plan (PICK) -->
+      <div class="pixel-box p-3 bg-orange-50 text-center border-orange-300">
+        <div class="text-xs text-orange-700 font-retro mb-1">방송 소개 예정 ⭐</div>
+        <div class="font-retro text-2xl text-retroOrange" id="statPlan">-</div>
+      </div>
+
+      <!-- Checked -->
+      <div class="pixel-box p-3 bg-blue-50 text-center border-blue-200">
+        <div class="text-xs text-blue-700 font-retro mb-1">확인 완료 👀</div>
+        <div class="font-retro text-2xl text-blue-700" id="statChecked">-</div>
+      </div>
+
+      <!-- Broadcast Done -->
+      <div class="pixel-box p-3 bg-emerald-50 text-center border-emerald-200">
+        <div class="text-xs text-emerald-700 font-retro mb-1">방송 완료 🎉</div>
+        <div class="font-retro text-2xl text-emerald-700" id="statDone">-</div>
+      </div>
+
+      <!-- Broadcast Agreement Rate -->
+      <div class="pixel-box p-3 bg-yellow-50 text-center border-yellow-200">
+        <div class="text-xs text-amber-800 font-retro mb-1">방송 동의율</div>
+        <div class="font-retro text-2xl text-amber-600" id="statAgreeRate">- %</div>
+      </div>
+
+    </div>
+
+    <!-- Category Distribution Mini Bar -->
+    <div class="pixel-box-sm bg-white p-3">
+      <div class="flex items-center justify-between text-xs font-retro text-gray-600 mb-2">
+        <span>📊 카테고리별 접수 분포</span>
+        <span id="categorySummaryText" class="text-[11px] text-gray-400 font-sans"></span>
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs" id="categoryPillsList">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- ==================== FILTERS & SEARCH TOOLBAR ==================== -->
+    <div class="pixel-box p-4 bg-white space-y-3">
+      
+      <!-- Row 1: Search & Sort -->
+      <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+        
+        <!-- Search Input -->
+        <div class="relative flex-grow max-w-lg">
+          <input type="text" id="searchInput" placeholder="제목, 내용, 닉네임, 접수번호 검색..."
+            class="form-input text-sm pl-9 py-2" onkeydown="if(event.key==='Enter') applyFilters()">
+          <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          
+          <!-- Category Select -->
+          <select id="filterCategory" class="form-select text-xs py-2 px-3 w-auto" onchange="applyFilters()">
+            <option value="all">전체 카테고리</option>
+            <option value="연애">❤️ 연애</option>
+            <option value="학업">📚 학업</option>
+            <option value="진로">🧭 진로</option>
+            <option value="인간관계">👥 인간관계</option>
+            <option value="가족">🏠 가족</option>
+            <option value="직장">💼 직장</option>
+            <option value="일상">☕ 일상</option>
+            <option value="웃긴 사연">🤣 웃긴 사연</option>
+            <option value="하찮은 고민">🥔 하찮은 고민</option>
+            <option value="기타">❓ 기타</option>
+          </select>
+
+          <!-- Agreement Select -->
+          <select id="filterAgree" class="form-select text-xs py-2 px-3 w-auto" onchange="applyFilters()">
+            <option value="all">방송 동의 전체</option>
+            <option value="1">📺 방송 동의만</option>
+            <option value="0">🔒 미동의 (보관)</option>
+          </select>
+
+          <!-- Sort -->
+          <select id="filterSort" class="form-select text-xs py-2 px-3 w-auto" onchange="applyFilters()">
+            <option value="newest">최신 접수순</option>
+            <option value="oldest">오래된 순</option>
+          </select>
+
+          <button onclick="applyFilters()" class="pixel-btn pixel-btn-orange text-xs py-2 px-3">
+            검색
+          </button>
+          <button onclick="resetFilters()" class="pixel-btn pixel-btn-cream text-xs py-2 px-2.5" title="필터 초기화">
+            초기화
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Row 2: Status Quick Tab Buttons -->
+      <div class="flex flex-wrap items-center gap-1.5 border-t border-gray-200 pt-3" id="statusTabGroup">
+        <span class="text-xs font-retro text-gray-500 mr-1">상태 필터:</span>
+        <button onclick="setStatusTab('all')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-dark" data-status="all">전체</button>
+        <button onclick="setStatusTab('unread')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-cream text-red-600" data-status="unread">미확인</button>
+        <button onclick="setStatusTab('broadcast_plan')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-cream text-orange-600" data-status="broadcast_plan">방송 예정 ⭐</button>
+        <button onclick="setStatusTab('checked')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-cream text-blue-600" data-status="checked">확인 완료</button>
+        <button onclick="setStatusTab('broadcast_done')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-cream text-emerald-600" data-status="broadcast_done">방송 완료</button>
+        <button onclick="setStatusTab('hold')" class="status-tab-btn pixel-btn text-xs py-1 px-2.5 pixel-btn-cream text-gray-500" data-status="hold">보류</button>
+      </div>
+
+    </div>
+
+    <!-- ==================== STORIES LIST SECTION ==================== -->
+    <div class="space-y-4">
+      
+      <!-- List Header Count -->
+      <div class="flex items-center justify-between text-xs text-gray-600 px-1">
+        <div>
+          총 <strong class="text-retroOrange font-bold text-sm" id="storyTotalText">0</strong>건의 사연
+        </div>
+        <div id="paginationSummary" class="text-gray-500">
+          페이지 1 / 1
+        </div>
+      </div>
+
+      <!-- Stories Cards / List Container -->
+      <div id="storiesListContainer" class="space-y-3">
+        <!-- Stories injected via JavaScript -->
+        <div class="p-8 text-center text-gray-400 font-retro">사연을 불러오는 중...</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-center items-center gap-2 pt-4" id="paginationControls">
+        <!-- Injected via JS -->
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== DETAIL MODAL ==================== -->
+  <div id="storyDetailModal" class="modal-overlay" onclick="if(event.target === this) closeDetailModal()">
+    <div class="modal-content p-6 max-w-2xl">
+      <div class="flex items-start justify-between border-b-2 border-retroDark pb-3 mb-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="pixel-badge text-xs" id="modalCategoryBadge">-</span>
+            <span class="pixel-badge text-xs" id="modalStatusBadge">-</span>
+            <span class="pixel-badge text-xs" id="modalAgreeBadge">-</span>
+          </div>
+          <h2 class="font-retro text-xl text-retroDark leading-snug" id="modalTitle">-</h2>
+        </div>
+        <button onclick="closeDetailModal()" class="text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
+      </div>
+
+      <!-- Meta Info -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-xs mb-4">
+        <div>
+          <span class="text-gray-500 block">접수 번호</span>
+          <span class="font-mono font-bold" id="modalTicketCode">-</span>
+        </div>
+        <div>
+          <span class="text-gray-500 block">익명 닉네임</span>
+          <span class="font-bold text-gray-800" id="modalNickname">-</span>
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <span class="text-gray-500 block">접수 일시</span>
+          <span class="text-gray-700 font-mono text-[11px]" id="modalCreatedAt">-</span>
+        </div>
+      </div>
+
+      <!-- Story Full Content -->
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-retro text-gray-600">사연 본문 전문</label>
+          <div class="flex gap-2">
+            <button onclick="copyModalContentOnly()" class="text-xs text-retroOrange hover:underline font-retro flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> 본문만 복사
+            </button>
+            <button onclick="copyModalBroadcastPackage()" class="text-xs text-emerald-600 hover:underline font-retro flex items-center gap-1 font-bold">
+              <i data-lucide="clapperboard" class="w-3 h-3"></i> 방송용 전체 복사
+            </button>
+          </div>
+        </div>
+        <div class="p-4 bg-white border-2 border-retroDark rounded-xl text-sm leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto" id="modalContent">
+          -
+        </div>
+      </div>
+
+      <!-- Streamer Private Memo -->
+      <div class="mb-5 bg-orange-50 p-3 rounded-xl border border-orange-200">
+        <label class="text-xs font-retro text-orange-900 block mb-1">
+          🔒 스트리머 비밀 메모 (시청자에게 비공개)
+        </label>
+        <textarea id="modalStreamerMemo" class="form-input text-xs h-16 w-full"
+          placeholder="방송 중 리액션 포인트, 멘트 메모를 적어두세요..."></textarea>
+        <div class="text-right mt-1.5">
+          <button onclick="saveModalMemo()" class="pixel-btn pixel-btn-orange text-xs py-1 px-3">
+            메모 저장
+          </button>
+        </div>
+      </div>
+
+      <!-- Status Quick Change & Actions -->
+      <div class="border-t-2 border-retroDark pt-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-retro text-gray-600">상태 변경:</label>
+          <select id="modalStatusSelect" onchange="changeModalStatus(this.value)" class="form-select text-xs py-1.5 px-3">
+            <option value="unread">미확인 (NEW)</option>
+            <option value="checked">확인 완료</option>
+            <option value="broadcast_plan">방송 예정 ⭐</option>
+            <option value="broadcast_done">방송 완료 🎉</option>
+            <option value="hold">보류</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="deleteCurrentModalStory()" class="pixel-btn bg-red-100 text-red-700 hover:bg-red-200 text-xs py-1.5 px-3">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 사연 삭제
+          </button>
+          <button onclick="closeDetailModal()" class="pixel-btn pixel-btn-cream text-xs py-1.5 px-4">
+            닫기
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== CHANGE PASSWORD MODAL ==================== -->
+  <div id="changePasswordModal" class="modal-overlay" onclick="if(event.target === this) closeChangePasswordModal()">
+    <div class="modal-content p-6 max-w-sm">
+      <div class="flex items-center justify-between border-b-2 border-retroDark pb-2 mb-4">
+        <h3 class="font-retro text-base text-retroDark">🔑 비밀번호 변경</h3>
+        <button onclick="closeChangePasswordModal()" class="text-gray-400 font-bold">&times;</button>
+      </div>
+      <form onsubmit="handleChangePassword(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-retro text-gray-600 mb-1">현재 비밀번호</label>
+          <input type="password" id="currentPasswordInput" required class="form-input text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-retro text-gray-600 mb-1">새 비밀번호 (6자 이상)</label>
+          <input type="password" id="newPasswordInput" required minlength="6" class="form-input text-xs">
+        </div>
+        <div id="changePwdError" class="text-xs text-red-600 hidden font-bold"></div>
+        <button type="submit" class="pixel-btn pixel-btn-orange w-full text-xs py-2 mt-2">
+          비밀번호 변경 저장
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Realtime Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Scripts -->
+  <script src="js/sound.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "zzaknoon-counseling-center",
+  "version": "1.0.0",
+  "description": "짝눈의 고민상담소 - 시청자 참여형 사연 접수 웹 플랫폼",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
